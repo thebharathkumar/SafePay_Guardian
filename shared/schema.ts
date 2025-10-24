@@ -122,6 +122,29 @@ export const insertPensionPaymentSchema = createInsertSchema(pensionPayments).om
 export type InsertPensionPayment = z.infer<typeof insertPensionPaymentSchema>;
 export type PensionPayment = typeof pensionPayments.$inferSelect;
 
+// Callback request schema
+export const callbackRequests = pgTable("callback_requests", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  customerId: text("customer_id"),
+  customerName: text("customer_name"),
+  phone: text("phone").notNull(),
+  message: text("message"),
+  status: text("status").notNull().default("pending"), // pending, in_progress, completed, cancelled
+  priority: text("priority").notNull().default("normal"), // low, normal, high, urgent
+  assignedBankerId: text("assigned_banker_id"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  completedAt: timestamp("completed_at"),
+});
+
+export const insertCallbackRequestSchema = createInsertSchema(callbackRequests).omit({
+  id: true,
+  createdAt: true,
+  completedAt: true,
+});
+
+export type InsertCallbackRequest = z.infer<typeof insertCallbackRequestSchema>;
+export type CallbackRequest = typeof callbackRequests.$inferSelect;
+
 // Transform request/response types
 export const transformRequestSchema = z.object({
   format: z.enum(['MT103', 'NACHA']),
