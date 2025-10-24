@@ -344,17 +344,11 @@ Springfield IL 62701
       </div>
 
       {/* Fraud Alert Modal */}
-      {result && (
-        <FraudAlertModal
-          open={showFraudAlert}
-          onOpenChange={setShowFraudAlert}
-          fraudScore={result.fraudScore}
-          fraudType={result.fraudType}
-          fraudSignals={result.fraudSignals || []}
-          amount={0}
-          recipient=""
-        />
-      )}
+      <FraudAlertModal
+        open={showFraudAlert}
+        onOpenChange={setShowFraudAlert}
+        transaction={result}
+      />
     </div>
   );
 }

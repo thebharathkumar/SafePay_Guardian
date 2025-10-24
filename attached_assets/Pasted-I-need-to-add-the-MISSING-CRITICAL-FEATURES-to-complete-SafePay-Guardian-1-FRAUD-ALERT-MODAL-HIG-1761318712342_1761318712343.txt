@@ -1,0 +1,73 @@
+I need to add the MISSING CRITICAL FEATURES to complete SafePay Guardian:
+
+1. FRAUD ALERT MODAL (HIGHEST PRIORITY - This is our competitive advantage!)
+   - Create frontend/src/components/Fraud/FraudAlertModal.tsx
+   - Auto-trigger when transaction.fraud_score > 70
+   - Show matched scam type and educational content
+   - Display 3 large buttons (20px font, 48px height):
+     * "✅ Yes, I Made This Payment" (green, full width)
+     * "🚫 No, This Is Fraud - Block It" (red, full width)
+     * "📞 Call Me - I Need Help" (blue, full width)
+   - Include prevention tips for the detected scam
+   - Make it WCAG AAA compliant (high contrast, large text)
+
+2. SENIOR DASHBOARD PAGE
+   - Create frontend/src/pages/SeniorDashboard.tsx
+   - Route: /dashboard/senior
+   - Extra large text (20px body, 2rem+ headings)
+   - Large balance card with green "Pension deposited 2 hours ago" chip
+   - "Next Expected Payment" card with date and amount
+   - Recent activity list with large icons (✅ ⚠️)
+   - Large action buttons (48px height): "View Alerts", "Call Bank"
+   - High contrast colors
+
+3. DEMO MODE TOGGLE
+   - Add toggle in header: "Demo Mode [ON/OFF]"
+   - When ON:
+     * Pre-fill transform textarea with sample MT103
+     * Add "Try Fraud Detection" button
+     * Auto-create suspicious transaction ($5000, "IRS TAX URGENT")
+     * Trigger fraud alert modal automatically
+     * Show complete workflow in 10 seconds
+
+4. DATABASE SEED SCRIPT
+   - Create backend/app/seed_data.py
+   - Seed customers table:
+     * Amitabh Bachchan (68, retiree, CUST001)
+   - Seed transactions:
+     * Safe: Pension deposit $2850
+     * Suspicious: IRS scam $5000 (fraud_score: 95)
+   - Seed fraud_patterns:
+     * IRS Tax Scam
+     * Grandparent Emergency
+     * Social Security Suspension
+   - Seed pension_payments with timeline data
+   - Run seed on app startup (development only)
+
+5. PENSION TRACKER UI
+   - Create frontend/src/components/Pension/PensionTimeline.tsx
+   - Visual timeline with 4 stages:
+     * Sent from SSA (8:58 AM)
+     * Received by MDCB (9:00 AM)
+     * Cleared (9:01 AM)
+     * Available in account (9:02 AM)
+   - Each stage: ● with timestamp and checkmark
+   - Green "Deposited 2 hours ago" status
+   - "Next payment: Jan 1, 2025" countdown
+
+6. COST SAVINGS CALCULATOR
+   - Add to Analytics dashboard
+   - Create Card showing:
+     * Current costs: $85,400/year
+     * New costs: $3,585/year  
+     * Savings: $81,815 (96%)
+   - Use large numbers and green color
+   - Add small bar chart comparing old vs new
+
+CRITICAL: All new components must be:
+- WCAG AAA compliant (high contrast)
+- Senior-friendly (20px+ text)
+- Touch-friendly (48px buttons)
+- Mobile responsive
+
+Please implement features 1-6 in order. Start with the Fraud Alert Modal

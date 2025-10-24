@@ -188,6 +188,16 @@ export const transformResponseSchema = z.object({
   fraudFlag: z.boolean(),
   fraudType: z.string().optional(),
   fraudSignals: z.array(z.string()).optional(),
+  detectedScams: z.array(z.object({
+    name: z.string(),
+    confidence: z.number(),
+    description: z.string(),
+    preventionTips: z.array(z.string()),
+    matchedTriggers: z.array(z.string()),
+  })).optional(),
+  amount: z.number().optional(),
+  recipientName: z.string().optional(),
+  remittanceInfo: z.string().optional(),
   errors: z.array(z.string()).optional(),
   warnings: z.array(z.string()).optional(),
 });

@@ -266,6 +266,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         fraudFlag: fraudAnalysis.fraudFlag,
         fraudType: fraudAnalysis.detectedScams[0]?.name,
         fraudSignals: fraudAnalysis.signals,
+        detectedScams: fraudAnalysis.detectedScams,
+        amount,
+        recipientName,
+        remittanceInfo,
         warnings: fraudAnalysis.fraudFlag 
           ? [`This transaction has been flagged for potential fraud (${fraudAnalysis.fraudScore}% risk)`]
           : undefined
