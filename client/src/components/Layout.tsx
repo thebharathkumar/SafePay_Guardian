@@ -1,7 +1,9 @@
 import { ReactNode } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Shield, LayoutDashboard, ArrowLeftRight, History, Phone } from "lucide-react";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Shield, LayoutDashboard, ArrowLeftRight, History, BarChart3, LogOut } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 import SupportWidget from "./SupportWidget";
 
 interface LayoutProps {
@@ -10,11 +12,13 @@ interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
   const [location] = useLocation();
+  const { user } = useAuth();
 
   const navItems = [
     { href: "/", label: "Dashboard", icon: LayoutDashboard },
     { href: "/transform", label: "Transform", icon: ArrowLeftRight },
     { href: "/history", label: "History", icon: History },
+    { href: "/analytics", label: "Analytics", icon: BarChart3 },
   ];
 
   return (
@@ -56,16 +60,37 @@ export default function Layout({ children }: LayoutProps) {
               })}
             </nav>
 
-            {/* Emergency Support Button */}
-            <Button
-              size="lg"
-              variant="destructive"
-              className="text-lg h-14 px-6 gap-3 hidden lg:flex"
-              data-testid="button-emergency-support"
-            >
-              <Phone className="h-5 w-5" />
-              Call Support
-            </Button>
+            {/* User Profile & Logout */}
+            <div className="flex items-center gap-4">
+              {user && (
+                <div className="hidden md:flex items-center gap-3 px-4 py-2 rounded-lg bg-muted/50">
+                  <Avatar className="h-12 w-12">
+                    <AvatarImage src={user.profileImageUrl || undefined} alt={user.email || "User"} style={{ objectFit: 'cover' }} />
+                    <AvatarFallback className="text-lg">
+                      {user.firstName?.charAt(0) || user.email?.charAt(0) || "U"}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="text-left">
+                    <p className="text-lg font-semibold text-foreground">
+                      {user.firstName && user.lastName 
+                        ? `${user.firstName} ${user.lastName}` 
+                        : user.email}
+                    </p>
+                    <p className="text-base text-muted-foreground">Account</p>
+                  </div>
+                </div>
+              )}
+              <Button
+                size="lg"
+                variant="outline"
+                className="text-lg h-14 px-6 gap-3"
+                onClick={() => window.location.href = "/api/logout"}
+                data-testid="button-logout"
+              >
+                <LogOut className="h-5 w-5" />
+                Logout
+              </Button>
+            </div>
           </div>
 
           {/* Mobile Navigation */}

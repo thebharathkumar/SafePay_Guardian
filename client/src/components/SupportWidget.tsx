@@ -6,28 +6,58 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Phone, X, MessageCircle, Send } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { isUnauthorizedError } from "@/lib/authUtils";
 
 export default function SupportWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [showCallbackForm, setShowCallbackForm] = useState(false);
-  const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [message, setMessage] = useState("");
   const { toast } = useToast();
 
+  const callbackMutation = useMutation({
+    mutationFn: async (data: { phone: string; message?: string }) => {
+      return await apiRequest("/api/callbacks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Callback Requested",
+        description: "A banker will call you within 15 minutes.",
+      });
+      setShowCallbackForm(false);
+      setPhone("");
+      setMessage("");
+      setIsOpen(false);
+    },
+    onError: (error: Error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Error",
+        description: "Failed to request callback. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleCallbackRequest = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    toast({
-      title: "Callback Requested",
-      description: "A banker will call you within 15 minutes.",
-    });
-
-    setShowCallbackForm(false);
-    setName("");
-    setPhone("");
-    setMessage("");
-    setIsOpen(false);
+    callbackMutation.mutate({ phone, message });
   };
 
   return (
@@ -103,22 +133,6 @@ export default function SupportWidget() {
             ) : (
               <form onSubmit={handleCallbackRequest} className="space-y-6">
                 <div>
-                  <Label htmlFor="callback-name" className="text-lg font-medium mb-3 block">
-                    Your Name
-                  </Label>
-                  <Input
-                    id="callback-name"
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Enter your full name"
-                    className="text-lg h-14"
-                    required
-                    data-testid="input-callback-name"
-                  />
-                </div>
-
-                <div>
                   <Label htmlFor="callback-phone" className="text-lg font-medium mb-3 block">
                     Phone Number
                   </Label>
@@ -166,10 +180,11 @@ export default function SupportWidget() {
                     type="submit"
                     size="lg"
                     className="flex-1 text-lg h-14 gap-2"
+                    disabled={callbackMutation.isPending}
                     data-testid="button-submit-callback"
                   >
                     <Send className="h-5 w-5" />
-                    Request Call
+                    {callbackMutation.isPending ? "Requesting..." : "Request Call"}
                   </Button>
                 </div>
               </form>

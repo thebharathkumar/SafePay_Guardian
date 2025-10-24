@@ -9,11 +9,14 @@ import {
   type InsertPensionPayment,
   type CallbackRequest,
   type InsertCallbackRequest,
+  type User,
+  type UpsertUser,
   transactions,
   fraudPatterns,
   customers,
   pensionPayments,
-  callbackRequests
+  callbackRequests,
+  users
 } from "@shared/schema";
 import { drizzle } from "drizzle-orm/neon-serverless";
 import { Pool, neonConfig } from "@neondatabase/serverless";
@@ -26,6 +29,10 @@ const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const db = drizzle(pool);
 
 export interface IStorage {
+  // User operations (REQUIRED for Replit Auth)
+  getUser(id: string): Promise<User | undefined>;
+  upsertUser(user: UpsertUser): Promise<User>;
+
   // Transaction operations
   createTransaction(transaction: InsertTransaction): Promise<Transaction>;
   getTransaction(id: string): Promise<Transaction | undefined>;
@@ -59,9 +66,30 @@ export interface IStorage {
 }
 
 export class DbStorage implements IStorage {
+  // User operations (REQUIRED for Replit Auth)
+  async getUser(id: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
+  }
+
+  async upsertUser(userData: UpsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(userData)
+      .onConflictDoUpdate({
+        target: users.id,
+        set: {
+          ...userData,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+    return user;
+  }
+
   // Transaction operations
   async createTransaction(insertTransaction: InsertTransaction): Promise<Transaction> {
-    const [transaction] = await db.insert(transactions).values(insertTransaction).returning();
+    const [transaction] = await db.insert(transactions).values([insertTransaction]).returning();
     return transaction;
   }
 
@@ -79,8 +107,21 @@ export class DbStorage implements IStorage {
     return await db.select().from(transactions).orderBy(desc(transactions.timestamp));
   }
 
+  async getTransactionsByCustomerId(customerId: string): Promise<Transaction[]> {
+    return await db.select().from(transactions)
+      .where(eq(transactions.customerId, customerId))
+      .orderBy(desc(transactions.timestamp));
+  }
+
   async getRecentTransactions(limit: number): Promise<Transaction[]> {
     return await db.select().from(transactions).orderBy(desc(transactions.timestamp)).limit(limit);
+  }
+
+  async getRecentTransactionsByCustomerId(customerId: string, limit: number): Promise<Transaction[]> {
+    return await db.select().from(transactions)
+      .where(eq(transactions.customerId, customerId))
+      .orderBy(desc(transactions.timestamp))
+      .limit(limit);
   }
 
   async updateTransaction(id: string, updates: Partial<Transaction>): Promise<Transaction | undefined> {
@@ -93,7 +134,7 @@ export class DbStorage implements IStorage {
 
   // Fraud pattern operations
   async createFraudPattern(insertPattern: InsertFraudPattern): Promise<FraudPattern> {
-    const [pattern] = await db.insert(fraudPatterns).values(insertPattern).returning();
+    const [pattern] = await db.insert(fraudPatterns).values([insertPattern]).returning();
     return pattern;
   }
 
@@ -108,7 +149,7 @@ export class DbStorage implements IStorage {
 
   // Customer operations
   async createCustomer(insertCustomer: InsertCustomer): Promise<Customer> {
-    const [customer] = await db.insert(customers).values(insertCustomer).returning();
+    const [customer] = await db.insert(customers).values([insertCustomer]).returning();
     return customer;
   }
 
@@ -123,7 +164,7 @@ export class DbStorage implements IStorage {
 
   // Pension payment operations
   async createPensionPayment(insertPayment: InsertPensionPayment): Promise<PensionPayment> {
-    const [payment] = await db.insert(pensionPayments).values(insertPayment).returning();
+    const [payment] = await db.insert(pensionPayments).values([insertPayment]).returning();
     return payment;
   }
 
@@ -146,7 +187,7 @@ export class DbStorage implements IStorage {
 
   // Callback request operations
   async createCallbackRequest(insertRequest: InsertCallbackRequest): Promise<CallbackRequest> {
-    const [request] = await db.insert(callbackRequests).values(insertRequest).returning();
+    const [request] = await db.insert(callbackRequests).values([insertRequest]).returning();
     return request;
   }
 
@@ -157,6 +198,12 @@ export class DbStorage implements IStorage {
 
   async getAllCallbackRequests(): Promise<CallbackRequest[]> {
     return await db.select().from(callbackRequests).orderBy(desc(callbackRequests.createdAt));
+  }
+
+  async getCallbackRequestsByCustomerId(customerId: string): Promise<CallbackRequest[]> {
+    return await db.select().from(callbackRequests)
+      .where(eq(callbackRequests.customerId, customerId))
+      .orderBy(desc(callbackRequests.createdAt));
   }
 
   async getCallbackRequestsByStatus(status: string): Promise<CallbackRequest[]> {

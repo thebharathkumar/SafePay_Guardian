@@ -6,6 +6,14 @@ SafePay Guardian is a web-based platform designed for Madhuri Dixit Community Ba
 
 The application serves as a case competition demonstration of real-time payment modernization for community banks, with particular focus on Persona 3 users (retirees) who are vulnerable to fraud schemes like IRS scams, grandparent emergency scams, and social security suspension scams.
 
+**New Features (October 2025)**:
+- Multi-user support with Replit Auth (OpenID Connect)
+- PostgreSQL database persistence with complete data migration
+- Callback request system for senior customers to request banker assistance
+- Analytics dashboard with fraud trends, transaction metrics, and downloadable reports
+- Batch file processing for multiple payment transformations
+- Landing page for unauthenticated users with product information
+
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
@@ -26,10 +34,12 @@ Preferred communication style: Simple, everyday language.
 
 **State Management**: TanStack React Query for server state management and caching, with custom query client configured for API interactions.
 
-**Routing**: Wouter for lightweight client-side routing with three main routes:
-- Dashboard (`/`) - Overview and statistics
+**Routing**: Wouter for lightweight client-side routing with five main routes:
+- Landing (`/` when unauthenticated) - Product information and login prompt
+- Dashboard (`/` when authenticated) - Overview and statistics
 - Transform (`/transform`) - Payment transformation interface
 - History (`/history`) - Transaction history and search
+- Analytics (`/analytics`) - Fraud analytics with charts and downloadable reports
 
 **Styling**: Tailwind CSS with custom configuration for senior-friendly design tokens, including enlarged font scales and banking-themed color palette using CSS custom properties.
 
@@ -38,10 +48,26 @@ Preferred communication style: Simple, everyday language.
 **Framework**: Express.js with TypeScript running on Node.js.
 
 **API Design**: RESTful API with the following main endpoints:
-- `POST /api/transform` - Transform legacy payment formats to ISO 20022
-- `GET /api/transactions` - Retrieve all transactions
+
+Authentication:
+- `GET /api/login` - Initiate Replit Auth login flow
+- `GET /api/callback` - OAuth callback handler
+- `GET /api/logout` - Logout and clear session
+- `GET /api/auth/user` - Get current authenticated user
+
+Payment Processing:
+- `POST /api/transform` - Transform single legacy payment to ISO 20022
+- `POST /api/transform/batch` - Batch process multiple payment files
+
+Data Retrieval:
+- `GET /api/transactions` - Retrieve all transactions for current user
 - `GET /api/transactions/recent` - Get recent transactions
 - `GET /api/dashboard/stats` - Dashboard statistics
+
+Callback Requests:
+- `POST /api/callbacks` - Create callback request for banker assistance
+- `GET /api/callbacks` - Get all callback requests (banker view)
+- `PATCH /api/callbacks/:id` - Update callback request status
 
 **Payment Transformation Logic**:
 - MT103 transformer (`server/transformers/mt103.ts`) - Parses SWIFT MT103 messages and converts to ISO 20022 pacs.008.001.08 XML format
@@ -57,13 +83,16 @@ Preferred communication style: Simple, everyday language.
 - Confidence scoring with configurable thresholds per scam type
 - Educational content with prevention tips for each scam pattern
 
-**Data Storage**: In-memory storage implementation (`server/storage.ts`) using Map-based data structures for:
-- Transactions
-- Fraud patterns
-- Customers
-- Pension payments
+**Data Storage**: PostgreSQL database with Drizzle ORM (`server/storage.ts`) for persistent data storage:
+- Transactions with fraud detection results
+- Fraud patterns catalog
+- Customers with age-based fraud alerts
+- Pension payments tracking
+- Callback requests with status management
+- Users (from Replit Auth)
+- Sessions (for authentication state)
 
-Note: While the repository is configured for PostgreSQL with Drizzle ORM (schema defined in `shared/schema.ts`), the current runtime uses in-memory storage for demo purposes.
+Migration: Successfully migrated from in-memory Map-based storage to PostgreSQL with full data preservation.
 
 ### Data Schema
 
@@ -86,11 +115,18 @@ Note: While the repository is configured for PostgreSQL with Drizzle ORM (schema
 
 ### External Dependencies
 
+**Authentication**:
+- Replit Auth (OpenID Connect) via `openid-client` library
+- Session storage in PostgreSQL via `express-session` and `connect-pg-simple`
+- Environment variables:
+  - `ISSUER_URL` - OpenID issuer URL (automatically configured by Replit)
+  - `SESSION_SECRET` - Session encryption key (automatically configured)
+
 **Database**: 
-- Drizzle ORM configured for PostgreSQL via Neon serverless driver
-- Connection string expected in `DATABASE_URL` environment variable
-- Migration files stored in `/migrations` directory
-- Current implementation uses in-memory storage as fallback
+- Drizzle ORM with PostgreSQL via Neon serverless driver
+- Connection string in `DATABASE_URL` environment variable
+- Schema push via `npm run db:push` (no manual migrations)
+- Active database with persistent user data
 
 **AI Services**:
 - OpenAI API (GPT-5 model) for fraud detection analysis
