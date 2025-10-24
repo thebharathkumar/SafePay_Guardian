@@ -68,9 +68,9 @@ async function seed() {
     await storage.createFraudPattern(pattern);
   }
 
-  // Seed sample customer
-  console.log("👤 Creating sample customer...");
-  const customer = await storage.createCustomer({
+  // Seed sample customers
+  console.log("👤 Creating sample customers...");
+  await storage.createCustomer({
     customerId: "CUST001",
     name: "Margaret Thompson",
     age: 72,
@@ -79,8 +79,21 @@ async function seed() {
     personaType: "retiree",
     techProficiency: "low",
     vulnerabilityScore: 0.3,
-    accessibilitySettings: { largeFonts: true, highContrast: true },
-    notificationPreferences: { email: true, sms: true }
+    accessibilitySettings: { largeFonts: true, highContrast: true } as Record<string, any>,
+    notificationPreferences: { email: true, sms: true } as Record<string, any>
+  });
+
+  const customer = await storage.createCustomer({
+    customerId: "CUST-BACHCHAN-2025",
+    name: "Amitabh Bachchan",
+    age: 68,
+    email: "amitabh.bachchan@mdcb.bank",
+    phone: "+1-555-0123",
+    personaType: "retiree",
+    techProficiency: "medium",
+    vulnerabilityScore: 0.65,
+    accessibilitySettings: { largeFonts: true, highContrast: true, textToSpeech: false } as Record<string, any>,
+    notificationPreferences: { email: true, sms: true, push: false } as Record<string, any>
   });
 
   // Seed sample transactions
@@ -159,17 +172,44 @@ async function seed() {
     await storage.createTransaction(tx);
   }
 
-  // Seed sample pension payment
-  console.log("💰 Creating sample pension payment...");
+  // Seed sample pension payments with 4-stage timeline
+  console.log("💰 Creating sample pension payments...");
+  const now = Date.now();
+  
+  // Completed payment (all 4 stages)
+  await storage.createPensionPayment({
+    paymentId: "PEN-2025-01",
+    customerId: "CUST-BACHCHAN-2025",
+    amount: 2850.00,
+    source: "Social Security",
+    sentTime: new Date(now - 4 * 24 * 60 * 60 * 1000), // 4 days ago
+    receivedTime: new Date(now - 3 * 24 * 60 * 60 * 1000), // 3 days ago
+    clearedTime: new Date(now - 2 * 24 * 60 * 60 * 1000), // 2 days ago
+    availableTime: new Date(now - 1 * 24 * 60 * 60 * 1000), // 1 day ago
+    status: "completed",
+    paymentMethod: "FedNow"
+  });
+
+  // In-progress payment (clearing stage)
+  await storage.createPensionPayment({
+    paymentId: "PEN-2025-02",
+    customerId: "CUST-BACHCHAN-2025",
+    amount: 1200.00,
+    source: "Pension Fund",
+    sentTime: new Date(now - 2 * 60 * 60 * 1000), // 2 hours ago
+    receivedTime: new Date(now - 1 * 60 * 60 * 1000), // 1 hour ago
+    clearedTime: new Date(now - 30 * 60 * 1000), // 30 minutes ago
+    status: "clearing",
+    paymentMethod: "ISO 20022"
+  });
+
+  // Scheduled future payment
   await storage.createPensionPayment({
     paymentId: "PEN-2025-03",
-    customerId: "CUST001",
-    amount: 2847.50,
+    customerId: "CUST-BACHCHAN-2025",
+    amount: 2850.00,
     source: "Social Security",
-    sentTime: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
-    receivedTime: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
-    clearedTime: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
-    status: "pending",
+    status: "scheduled",
     paymentMethod: "FedNow"
   });
 

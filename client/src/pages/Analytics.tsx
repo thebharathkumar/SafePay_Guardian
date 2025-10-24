@@ -321,6 +321,154 @@ export default function Analytics() {
           </div>
         </Card>
       </div>
+
+      {/* Cost Savings Calculator */}
+      <Card className="p-8 bg-primary/5 border-primary/20">
+        <div className="mb-8">
+          <h2 className="text-3xl font-bold text-foreground mb-3 flex items-center gap-3">
+            <TrendingUp className="h-8 w-8 text-primary" />
+            ISO 20022 Cost Savings Calculator
+          </h2>
+          <p className="text-xl text-muted-foreground">
+            Annual cost comparison for 1,000 monthly transactions
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+          {/* Legacy Costs */}
+          <div className="bg-destructive/10 rounded-lg p-6 border-2 border-destructive/30" data-testid="card-legacy-costs">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="h-12 w-12 rounded-lg bg-destructive/20 flex items-center justify-center">
+                <AlertTriangle className="h-6 w-6 text-destructive" />
+              </div>
+              <h3 className="text-2xl font-semibold text-foreground">Legacy Systems</h3>
+            </div>
+            <div className="space-y-4 mb-6">
+              <div className="flex justify-between text-xl">
+                <span className="text-muted-foreground">SWIFT MT103 Fees:</span>
+                <span className="font-semibold" data-testid="text-mt103-fees">$42,000</span>
+              </div>
+              <div className="flex justify-between text-xl">
+                <span className="text-muted-foreground">NACHA Processing:</span>
+                <span className="font-semibold" data-testid="text-nacha-fees">$28,500</span>
+              </div>
+              <div className="flex justify-between text-xl">
+                <span className="text-muted-foreground">Manual Reviews:</span>
+                <span className="font-semibold" data-testid="text-manual-fees">$14,900</span>
+              </div>
+              <div className="h-px bg-destructive/30 my-4" />
+              <div className="flex justify-between text-2xl font-bold">
+                <span className="text-foreground">Annual Total:</span>
+                <span className="text-destructive" data-testid="text-legacy-total">$85,400</span>
+              </div>
+            </div>
+          </div>
+
+          {/* ISO 20022 Costs */}
+          <div className="bg-chart-2/10 rounded-lg p-6 border-2 border-chart-2/30" data-testid="card-iso-costs">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="h-12 w-12 rounded-lg bg-chart-2/20 flex items-center justify-center">
+                <Shield className="h-6 w-6 text-chart-2" />
+              </div>
+              <h3 className="text-2xl font-semibold text-foreground">ISO 20022</h3>
+            </div>
+            <div className="space-y-4 mb-6">
+              <div className="flex justify-between text-xl">
+                <span className="text-muted-foreground">Processing Fees:</span>
+                <span className="font-semibold" data-testid="text-iso-processing">$1,200</span>
+              </div>
+              <div className="flex justify-between text-xl">
+                <span className="text-muted-foreground">AI Fraud Detection:</span>
+                <span className="font-semibold" data-testid="text-ai-fees">$1,800</span>
+              </div>
+              <div className="flex justify-between text-xl">
+                <span className="text-muted-foreground">Platform Maintenance:</span>
+                <span className="font-semibold" data-testid="text-platform-fees">$585</span>
+              </div>
+              <div className="h-px bg-chart-2/30 my-4" />
+              <div className="flex justify-between text-2xl font-bold">
+                <span className="text-foreground">Annual Total:</span>
+                <span className="text-chart-2" data-testid="text-iso-total">$3,585</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Savings Bar Chart */}
+        <div className="mb-8">
+          <h3 className="text-2xl font-semibold mb-6">Cost Comparison Visualization</h3>
+          <ResponsiveContainer width="100%" height={250}>
+            <BarChart
+              data={[
+                { name: 'Legacy Systems', cost: 85400, fill: COLORS.destructive },
+                { name: 'ISO 20022', cost: 3585, fill: COLORS.chart2 }
+              ]}
+              layout="vertical"
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+              <XAxis 
+                type="number"
+                stroke="hsl(var(--muted-foreground))"
+                style={{ fontSize: '16px' }}
+                tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
+              />
+              <YAxis 
+                dataKey="name"
+                type="category"
+                stroke="hsl(var(--muted-foreground))"
+                style={{ fontSize: '16px' }}
+                width={150}
+              />
+              <Tooltip 
+                contentStyle={{
+                  backgroundColor: "hsl(var(--card))",
+                  border: "1px solid hsl(var(--border))",
+                  borderRadius: "8px",
+                  fontSize: "16px"
+                }}
+                formatter={(value: number) => `$${value.toLocaleString()}`}
+              />
+              <Bar dataKey="cost" radius={[0, 8, 8, 0]}>
+                {[0, 1].map((index) => (
+                  <Cell 
+                    key={`cell-${index}`}
+                    fill={index === 0 ? COLORS.destructive : COLORS.chart2}
+                  />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Savings Summary */}
+        <div className="bg-primary/10 rounded-lg p-8 border-2 border-primary/30" data-testid="card-savings-summary">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="text-center">
+              <p className="text-xl text-muted-foreground mb-2">Annual Savings</p>
+              <p className="text-5xl font-bold text-primary" data-testid="text-annual-savings">
+                $81,815
+              </p>
+            </div>
+            <div className="text-center">
+              <p className="text-xl text-muted-foreground mb-2">Cost Reduction</p>
+              <p className="text-5xl font-bold text-primary" data-testid="text-cost-reduction">
+                96%
+              </p>
+            </div>
+            <div className="text-center">
+              <p className="text-xl text-muted-foreground mb-2">ROI Timeline</p>
+              <p className="text-5xl font-bold text-primary" data-testid="text-roi-timeline">
+                &lt; 3 mo
+              </p>
+            </div>
+          </div>
+          <div className="mt-6 text-center">
+            <p className="text-xl text-muted-foreground">
+              SafePay Guardian delivers enterprise-grade fraud protection at a fraction of traditional costs
+            </p>
+          </div>
+        </div>
+      </Card>
     </div>
   );
 }
