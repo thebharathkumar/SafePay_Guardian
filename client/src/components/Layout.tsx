@@ -63,6 +63,24 @@ export default function Layout({ children }: LayoutProps) {
 
             {/* User Profile & Logout */}
             <div className="flex items-center gap-4">
+              {/* Demo Mode Toggle */}
+              <div className="flex items-center gap-3 px-4 py-2 rounded-lg bg-blue-600/10 border border-blue-600/20">
+                <span className="text-lg font-medium text-foreground">Demo Mode</span>
+                <Button
+                  size="sm"
+                  variant={localStorage.getItem('demoMode') === 'true' ? "default" : "outline"}
+                  className="text-base h-10 px-4"
+                  onClick={() => {
+                    const currentMode = localStorage.getItem('demoMode') === 'true';
+                    localStorage.setItem('demoMode', (!currentMode).toString());
+                    window.location.reload();
+                  }}
+                  data-testid="button-demo-mode-toggle"
+                >
+                  {localStorage.getItem('demoMode') === 'true' ? 'ON' : 'OFF'}
+                </Button>
+              </div>
+              
               {user && (
                 <div className="hidden md:flex items-center gap-3 px-4 py-2 rounded-lg bg-muted/50">
                   <Avatar className="h-12 w-12">

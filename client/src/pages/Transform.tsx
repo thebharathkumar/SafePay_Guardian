@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { AlertCircle, CheckCircle2, Upload, Download, FileText, Shield } from "lucide-react";
+import { AlertCircle, CheckCircle2, Upload, Download, FileText, Shield, Zap } from "lucide-react";
 import type { TransformResponse } from "@shared/schema";
 import FraudAlertModal from "@/components/FraudAlertModal";
 
@@ -18,6 +18,20 @@ export default function Transform() {
   const [showFraudAlert, setShowFraudAlert] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const isDemoMode = localStorage.getItem('demoMode') === 'true';
+
+  // Suspicious demo sample for fraud detection
+  const suspiciousMT103 = `:20:TRX123456789
+:23B:CRED
+:32A:250315USD5000,00
+:50K:Senior Citizen
+123 Retirement Ave
+Phoenix AZ 85001
+:59:IRS Tax Collection
+Federal Treasury Dept
+Washington DC 20001
+:70:URGENT IRS TAX PENALTY PAYMENT REQUIRED IMMEDIATELY
+:71A:SHA`;
 
   const sampleMT103 = `:20:TRX123456789
 :23B:CRED
@@ -36,6 +50,21 @@ Springfield IL 62701
 62212345678901234567890000025000EMPLOYEE001       Doe, John                       0987654321000001
 822500000100123456780000000000000000250001234567890                         987654321000001
 9000001000001000000010012345678000000000000000002500                                       `;
+
+  // Auto-demo mode effect
+  useEffect(() => {
+    if (isDemoMode && !content) {
+      // Pre-fill with suspicious transaction
+      setContent(suspiciousMT103);
+      setFormat("MT103");
+      
+      toast({
+        title: "Demo Mode Activated",
+        description: "Sample fraud transaction loaded. Click 'Try Fraud Detection' to see it in action!",
+        duration: 5000,
+      });
+    }
+  }, [isDemoMode]);
 
   const transformMutation = useMutation({
     mutationFn: async (data: { format: string; content: string }) => {
@@ -74,6 +103,22 @@ Springfield IL 62701
     }
 
     transformMutation.mutate({ format, content });
+  };
+
+  const handleDemoFraudDetection = () => {
+    setContent(suspiciousMT103);
+    setFormat("MT103");
+    
+    toast({
+      title: "Running Fraud Detection Demo...",
+      description: "Processing suspicious transaction",
+      duration: 3000,
+    });
+    
+    // Auto-submit after brief delay
+    setTimeout(() => {
+      transformMutation.mutate({ format: "MT103", content: suspiciousMT103 });
+    }, 1000);
   };
 
   const handleDownload = () => {
@@ -203,25 +248,42 @@ Springfield IL 62701
             </div>
 
             {/* Transform Button */}
-            <Button
-              size="lg"
-              className="w-full text-xl h-16"
-              onClick={handleTransform}
-              disabled={transformMutation.isPending || !content.trim()}
-              data-testid="button-transform"
-            >
-              {transformMutation.isPending ? (
-                <>
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white mr-3"></div>
-                  Transforming...
-                </>
-              ) : (
-                <>
-                  <Shield className="mr-3 h-6 w-6" />
-                  Transform & Analyze
-                </>
+            <div className="space-y-4">
+              <Button
+                size="lg"
+                className="w-full text-xl h-16"
+                onClick={handleTransform}
+                disabled={transformMutation.isPending || !content.trim()}
+                data-testid="button-transform"
+              >
+                {transformMutation.isPending ? (
+                  <>
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white mr-3"></div>
+                    Transforming...
+                  </>
+                ) : (
+                  <>
+                    <Shield className="mr-3 h-6 w-6" />
+                    Transform & Analyze
+                  </>
+                )}
+              </Button>
+
+              {/* Demo Mode - Try Fraud Detection Button */}
+              {isDemoMode && (
+                <Button
+                  size="lg"
+                  variant="secondary"
+                  className="w-full text-xl h-16 bg-blue-600 hover:bg-blue-700 text-white"
+                  onClick={handleDemoFraudDetection}
+                  disabled={transformMutation.isPending}
+                  data-testid="button-demo-fraud-detection"
+                >
+                  <Zap className="mr-3 h-6 w-6" />
+                  ⚡ Try Fraud Detection Demo
+                </Button>
               )}
-            </Button>
+            </div>
           </Card>
 
           {/* Output Section */}
