@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import Layout from "@/components/Layout";
 import Landing from "@/pages/Landing";
 import Dashboard from "@/pages/Dashboard";
+import SeniorDashboard from "@/pages/SeniorDashboard";
 import Transform from "@/pages/Transform";
 import TransactionHistory from "@/pages/TransactionHistory";
 import Analytics from "@/pages/Analytics";
@@ -30,6 +31,7 @@ function Router() {
     <Layout>
       <Switch>
         <Route path="/" component={Dashboard} />
+        <Route path="/dashboard/senior" component={SeniorDashboard} />
         <Route path="/transform" component={Transform} />
         <Route path="/history" component={TransactionHistory} />
         <Route path="/analytics" component={Analytics} />

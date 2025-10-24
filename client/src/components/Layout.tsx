@@ -2,7 +2,7 @@ import { ReactNode } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Shield, LayoutDashboard, ArrowLeftRight, History, BarChart3, LogOut } from "lucide-react";
+import { Shield, LayoutDashboard, ArrowLeftRight, History, BarChart3, LogOut, User } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import SupportWidget from "./SupportWidget";
 
@@ -16,6 +16,7 @@ export default function Layout({ children }: LayoutProps) {
 
   const navItems = [
     { href: "/", label: "Dashboard", icon: LayoutDashboard },
+    { href: "/dashboard/senior", label: "Senior View", icon: User },
     { href: "/transform", label: "Transform", icon: ArrowLeftRight },
     { href: "/history", label: "History", icon: History },
     { href: "/analytics", label: "Analytics", icon: BarChart3 },
