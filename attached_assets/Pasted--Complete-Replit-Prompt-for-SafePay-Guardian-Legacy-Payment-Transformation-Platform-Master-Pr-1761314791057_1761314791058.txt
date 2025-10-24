@@ -1,0 +1,1264 @@
+# Complete Replit Prompt for SafePay Guardian - Legacy Payment Transformation Platform
+
+## Master Prompt for AI Agent (Copy this entire prompt to Replit Agent)
+
+```
+I need you to build a complete web application called "SafePay Guardian" for Madhuri Dixit Community Bank (MDCB). This is a legacy payment transformation platform that converts SWIFT MT103 and NACHA formats to ISO 20022 XML, with AI-powered fraud detection specifically designed for senior customers.
+
+## PROJECT OVERVIEW
+
+This is for a case competition demonstrating real-time payment modernization for a community bank. The platform has 4 customer personas, but we're focusing on Persona 3 (Retirees - Amitabh & Jaya, ages 68-70).
+
+## TECHNOLOGY STACK
+
+### Backend:
+- FastAPI (Python 3.11+)
+- SQLite database (for demo purposes, easy setup in Replit)
+- Python libraries: lxml, xmlschema, pydantic, python-jose, passlib
+- Existing transformation scripts: mt103_transformer.py and nacha_transformer.py (I'll provide these)
+
+### Frontend:
+- React 18 with TypeScript
+- Vite for build tool
+- Material-UI (@mui/material) for components
+- React Query for state management
+- Axios for API calls
+- Recharts for data visualization
+- Monaco Editor for XML display
+
+### Project Structure:
+```
+safepay-guardian/
+├── backend/
+│   ├── app/
+│   │   ├── main.py                    # FastAPI entry point
+│   │   ├── config.py                  # Configuration settings
+│   │   ├── database.py                # SQLite database setup
+│   │   ├── models.py                  # SQLAlchemy models
+│   │   ├── schemas.py                 # Pydantic schemas
+│   │   ├── api/
+│   │   │   ├── __init__.py
+│   │   │   ├── transform.py           # Transformation endpoints
+│   │   │   ├── fraud.py               # Fraud detection endpoints
+│   │   │   ├── dashboard.py           # Analytics endpoints
+│   │   │   └── pension.py             # Pension tracking endpoints
+│   │   ├── services/
+│   │   │   ├── __init__.py
+│   │   │   ├── fraud_detector.py      # Fraud detection logic
+│   │   │   ├── fednow_simulator.py    # Simulated FedNow payments
+│   │   │   └── notification.py        # Multi-channel notifications
+│   │   ├── transformers/
+│   │   │   ├── __init__.py
+│   │   │   ├── mt103_transformer.py   # Existing MT103 transformer
+│   │   │   ├── nacha_transformer.py   # Existing NACHA transformer
+│   │   │   └── validator.py           # XML validation
+│   │   └── data/
+│   │       ├── scam_patterns.json     # Fraud patterns database
+│   │       └── sample_data.json       # Demo transaction data
+│   ├── requirements.txt
+│   └── run.py                         # Backend startup script
+├── frontend/
+│   ├── src/
+│   │   ├── App.tsx                    # Main app component
+│   │   ├── main.tsx                   # Entry point
+│   │   ├── theme.ts                   # MUI theme customization
+│   │   ├── components/
+│   │   │   ├── Layout/
+│   │   │   │   ├── Navbar.tsx
+│   │   │   │   └── Sidebar.tsx
+│   │   │   ├── Dashboard/
+│   │   │   │   ├── SeniorDashboard.tsx    # Main retiree dashboard
+│   │   │   │   ├── BalanceCard.tsx
+│   │   │   │   ├── RecentActivity.tsx
+│   │   │   │   └── QuickActions.tsx
+│   │   │   ├── Transform/
+│   │   │   │   ├── TransformForm.tsx       # Upload MT103/NACHA
+│   │   │   │   ├── TransformResult.tsx     # Show XML output
+│   │   │   │   └── ValidationDisplay.tsx   # Validation results
+│   │   │   ├── Fraud/
+│   │   │   │   ├── FraudAlert.tsx          # Fraud warning modal
+│   │   │   │   ├── FraudAnalysis.tsx       # Show detection details
+│   │   │   │   └── ScamEducation.tsx       # Educational content
+│   │   │   ├── Pension/
+│   │   │   │   ├── PensionTracker.tsx      # Track pension deposits
+│   │   │   │   └── PaymentTimeline.tsx     # Visual timeline
+│   │   │   └── Support/
+│   │   │       ├── SupportWidget.tsx       # Always-visible help
+│   │   │       └── CallbackRequest.tsx     # Request human call
+│   │   ├── pages/
+│   │   │   ├── Home.tsx
+│   │   │   ├── Transform.tsx
+│   │   │   ├── Dashboard.tsx
+│   │   │   ├── Payments.tsx
+│   │   │   └── Analytics.tsx
+│   │   ├── services/
+│   │   │   └── api.ts                      # API client
+│   │   ├── hooks/
+│   │   │   ├── useTransform.ts
+│   │   │   ├── useFraudCheck.ts
+│   │   │   └── usePensionTracking.ts
+│   │   └── types/
+│   │       └── index.ts                    # TypeScript types
+│   ├── package.json
+│   ├── tsconfig.json
+│   ├── vite.config.ts
+│   └── index.html
+├── .replit                                 # Replit configuration
+└── README.md
+```
+
+## DETAILED IMPLEMENTATION REQUIREMENTS
+
+### 1. BACKEND IMPLEMENTATION
+
+#### A. Main FastAPI Application (backend/app/main.py):
+```python
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+import uvicorn
+
+from app.api import transform, fraud, dashboard, pension
+from app.database import engine, Base
+
+# Create database tables
+Base.metadata.create_all(bind=engine)
+
+app = FastAPI(
+    title="SafePay Guardian API",
+    description="Legacy Payment Transformation with AI Fraud Detection",
+    version="1.0.0"
+)
+
+# CORS middleware for frontend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Include routers
+app.include_router(transform.router, prefix="/api/transform", tags=["Transform"])
+app.include_router(fraud.router, prefix="/api/fraud", tags=["Fraud Detection"])
+app.include_router(dashboard.router, prefix="/api/dashboard", tags=["Dashboard"])
+app.include_router(pension.router, prefix="/api/pension", tags=["Pension"])
+
+@app.get("/")
+def root():
+    return {
+        "message": "SafePay Guardian API",
+        "version": "1.0.0",
+        "status": "running"
+    }
+
+@app.get("/health")
+def health_check():
+    return {"status": "healthy"}
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)
+```
+
+#### B. Database Models (backend/app/models.py):
+```python
+from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime, Text, JSON
+from sqlalchemy.ext.declarative import declarative_base
+from datetime import datetime
+
+Base = declarative_base()
+
+class Transaction(Base):
+    __tablename__ = "transactions"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    transaction_id = Column(String, unique=True, index=True)
+    customer_id = Column(String, index=True)
+    customer_age = Column(Integer)
+    
+    # Transaction details
+    amount = Column(Float)
+    currency = Column(String, default="USD")
+    timestamp = Column(DateTime, default=datetime.utcnow)
+    
+    # Parties
+    sender_name = Column(String)
+    recipient_name = Column(String)
+    recipient_account = Column(String)
+    remittance_info = Column(Text)
+    
+    # Format info
+    source_format = Column(String)  # 'MT103' or 'NACHA'
+    iso20022_xml = Column(Text)
+    
+    # Fraud detection
+    fraud_score = Column(Float, default=0.0)
+    fraud_flag = Column(Boolean, default=False)
+    fraud_type = Column(String, nullable=True)
+    fraud_signals = Column(JSON, nullable=True)
+    
+    # Status
+    status = Column(String, default="pending")  # pending, approved, blocked, reviewing
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class FraudPattern(Base):
+    __tablename__ = "fraud_patterns"
+    
+    id = Column(Integer, primary_key=True)
+    scam_name = Column(String, unique=True)
+    trigger_words = Column(JSON)
+    typical_amount_min = Column(Float)
+    typical_amount_max = Column(Float)
+    confidence_threshold = Column(Float)
+    description = Column(Text)
+    prevention_tips = Column(JSON)
+    target_age_group = Column(String)
+    
+class Customer(Base):
+    __tablename__ = "customers"
+    
+    id = Column(Integer, primary_key=True)
+    customer_id = Column(String, unique=True, index=True)
+    name = Column(String)
+    age = Column(Integer)
+    email = Column(String)
+    phone = Column(String)
+    
+    # Profile
+    persona_type = Column(String)  # 'retiree', 'business', 'consumer', 'student'
+    tech_proficiency = Column(String)  # 'low', 'medium', 'high'
+    vulnerability_score = Column(Float, default=0.0)
+    
+    # Preferences
+    accessibility_settings = Column(JSON)
+    notification_preferences = Column(JSON)
+    
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+class PensionPayment(Base):
+    __tablename__ = "pension_payments"
+    
+    id = Column(Integer, primary_key=True)
+    payment_id = Column(String, unique=True)
+    customer_id = Column(String, index=True)
+    
+    amount = Column(Float)
+    source = Column(String)  # 'Social Security', 'Pension Fund', etc.
+    
+    # Timeline
+    sent_time = Column(DateTime)
+    received_time = Column(DateTime, nullable=True)
+    cleared_time = Column(DateTime, nullable=True)
+    available_time = Column(DateTime, nullable=True)
+    
+    status = Column(String, default="pending")
+    payment_method = Column(String, default="FedNow")
+```
+
+#### C. Fraud Detection Service (backend/app/services/fraud_detector.py):
+```python
+import re
+from typing import List, Dict
+import json
+from datetime import datetime
+
+class FraudDetector:
+    def __init__(self):
+        self.load_scam_patterns()
+    
+    def load_scam_patterns(self):
+        """Load fraud patterns from JSON file"""
+        self.scam_patterns = [
+            {
+                "name": "IRS Tax Scam",
+                "trigger_words": ["IRS", "tax", "owe", "arrest", "warrant", "agent", "revenue"],
+                "amount_range": (1000, 10000),
+                "confidence_threshold": 0.9,
+                "description": "Scammer impersonates IRS agent demanding immediate payment",
+                "prevention_tips": [
+                    "IRS never calls to demand immediate payment",
+                    "IRS never threatens arrest over the phone",
+                    "IRS contacts you by mail first"
+                ]
+            },
+            {
+                "name": "Grandparent Emergency Scam",
+                "trigger_words": ["grandson", "granddaughter", "emergency", "accident", "jail", "bail", "hospital"],
+                "amount_range": (500, 5000),
+                "confidence_threshold": 0.85,
+                "description": "Scammer impersonates grandchild in emergency",
+                "prevention_tips": [
+                    "Always verify by calling your grandchild directly",
+                    "Ask questions only the real person would know"
+                ]
+            },
+            {
+                "name": "Social Security Suspension",
+                "trigger_words": ["social security", "SSN", "suspended", "fraud", "investigation", "verify"],
+                "amount_range": (500, 3000),
+                "confidence_threshold": 0.92,
+                "description": "Scammer claims Social Security number is suspended",
+                "prevention_tips": [
+                    "Social Security Administration never suspends SSNs",
+                    "Contact SSA directly at 1-800-772-1213"
+                ]
+            },
+            {
+                "name": "Tech Support Scam",
+                "trigger_words": ["microsoft", "apple", "virus", "computer", "support", "refund"],
+                "amount_range": (100, 1000),
+                "confidence_threshold": 0.88,
+                "description": "Scammer claims computer has virus",
+                "prevention_tips": [
+                    "Microsoft/Apple never cold-call customers",
+                    "Never give remote access to your computer"
+                ]
+            }
+        ]
+    
+    def analyze_transaction(self, transaction_data: Dict) -> Dict:
+        """Analyze transaction for fraud"""
+        amount = transaction_data.get('amount', 0)
+        remittance_info = transaction_data.get('remittance_info', '').lower()
+        customer_age = transaction_data.get('customer_age', 0)
+        
+        risk_score = 0
+        signals = []
+        matched_scam = None
+        
+        # Check for scam pattern matches
+        for pattern in self.scam_patterns:
+            matched_triggers = [
+                word for word in pattern['trigger_words']
+                if word.lower() in remittance_info
+            ]
+            
+            if matched_triggers:
+                # Calculate confidence
+                trigger_ratio = len(matched_triggers) / len(pattern['trigger_words'])
+                amount_match = pattern['amount_range'][0] <= amount <= pattern['amount_range'][1]
+                
+                confidence = trigger_ratio * 0.6
+                if amount_match:
+                    confidence += 0.3
+                if customer_age >= 60:
+                    confidence += 0.1
+                
+                if confidence >= pattern['confidence_threshold']:
+                    risk_score += 50
+                    matched_scam = pattern
+                    signals.append({
+                        'type': 'scam_pattern',
+                        'severity': 'critical',
+                        'scam_type': pattern['name'],
+                        'matched_words': matched_triggers,
+                        'confidence': confidence
+                    })
+                    break
+        
+        # Behavioral checks
+        if amount > 1000 and customer_age >= 60:
+            risk_score += 20
+            signals.append({
+                'type': 'unusual_amount',
+                'severity': 'medium',
+                'reason': f'Large transaction (${amount}) for senior customer'
+            })
+        
+        # Urgency indicators
+        urgency_words = ['urgent', 'immediate', 'now', 'today', 'quickly', 'emergency']
+        if any(word in remittance_info for word in urgency_words):
+            risk_score += 15
+            signals.append({
+                'type': 'urgency',
+                'severity': 'medium',
+                'reason': 'Transaction contains urgency indicators'
+            })
+        
+        # Determine action
+        if risk_score >= 70:
+            action = 'BLOCK_AND_CALL'
+        elif risk_score >= 40:
+            action = 'FREEZE_AND_VERIFY'
+        elif risk_score >= 20:
+            action = 'CHALLENGE'
+        else:
+            action = 'ALLOW'
+        
+        return {
+            'risk_score': risk_score,
+            'action': action,
+            'signals': signals,
+            'matched_scam': matched_scam,
+            'fraud_detected': risk_score >= 40
+        }
+```
+
+#### D. Transform API Endpoint (backend/app/api/transform.py):
+```python
+from fastapi import APIRouter, HTTPException, UploadFile, File
+from pydantic import BaseModel
+from typing import Optional
+import sys
+sys.path.append('..')
+
+from app.transformers.mt103_transformer import transform_mt103_to_iso20022
+from app.transformers.nacha_transformer import transform_nacha_to_iso20022
+
+router = APIRouter()
+
+class TransformRequest(BaseModel):
+    message_text: str
+    format_type: str  # 'MT103' or 'NACHA'
+
+class TransformResponse(BaseModel):
+    success: bool
+    iso20022_xml: Optional[str]
+    validation_passed: bool
+    errors: list
+    warnings: list
+
+@router.post("/", response_model=TransformResponse)
+async def transform_message(request: TransformRequest):
+    """Transform legacy message to ISO 20022"""
+    try:
+        if request.format_type == 'MT103':
+            xml_output = transform_mt103_to_iso20022(request.message_text)
+        elif request.format_type == 'NACHA':
+            xml_output = transform_nacha_to_iso20022(request.message_text)
+        else:
+            raise HTTPException(status_code=400, detail="Invalid format type")
+        
+        return TransformResponse(
+            success=True,
+            iso20022_xml=xml_output,
+            validation_passed=True,
+            errors=[],
+            warnings=[]
+        )
+    except Exception as e:
+        return TransformResponse(
+            success=False,
+            iso20022_xml=None,
+            validation_passed=False,
+            errors=[str(e)],
+            warnings=[]
+        )
+
+@router.post("/upload")
+async def upload_file(file: UploadFile = File(...)):
+    """Upload and transform file"""
+    content = await file.read()
+    message_text = content.decode('utf-8')
+    
+    # Auto-detect format
+    format_type = 'MT103' if ':20:' in message_text else 'NACHA'
+    
+    return await transform_message(TransformRequest(
+        message_text=message_text,
+        format_type=format_type
+    ))
+```
+
+#### E. Fraud API Endpoint (backend/app/api/fraud.py):
+```python
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
+from typing import Optional, List, Dict
+
+from app.services.fraud_detector import FraudDetector
+
+router = APIRouter()
+fraud_detector = FraudDetector()
+
+class FraudCheckRequest(BaseModel):
+    transaction_id: str
+    customer_id: str
+    customer_age: int
+    amount: float
+    recipient_name: str
+    remittance_info: str
+
+class FraudCheckResponse(BaseModel):
+    transaction_id: str
+    fraud_detected: bool
+    risk_score: float
+    action: str
+    signals: List[Dict]
+    matched_scam: Optional[Dict]
+    educational_content: Optional[Dict]
+
+@router.post("/check", response_model=FraudCheckResponse)
+async def check_fraud(request: FraudCheckRequest):
+    """Check transaction for fraud"""
+    
+    analysis = fraud_detector.analyze_transaction({
+        'amount': request.amount,
+        'remittance_info': request.remittance_info,
+        'customer_age': request.customer_age
+    })
+    
+    educational_content = None
+    if analysis['matched_scam']:
+        educational_content = {
+            'scam_name': analysis['matched_scam']['name'],
+            'description': analysis['matched_scam']['description'],
+            'prevention_tips': analysis['matched_scam']['prevention_tips']
+        }
+    
+    return FraudCheckResponse(
+        transaction_id=request.transaction_id,
+        fraud_detected=analysis['fraud_detected'],
+        risk_score=analysis['risk_score'],
+        action=analysis['action'],
+        signals=analysis['signals'],
+        matched_scam=analysis['matched_scam'],
+        educational_content=educational_content
+    )
+
+@router.get("/patterns")
+async def get_fraud_patterns():
+    """Get all fraud patterns"""
+    return {"patterns": fraud_detector.scam_patterns}
+```
+
+#### F. Dashboard API (backend/app/api/dashboard.py):
+```python
+from fastapi import APIRouter
+from datetime import datetime, timedelta
+import random
+
+router = APIRouter()
+
+@router.get("/senior/{customer_id}")
+async def get_senior_dashboard(customer_id: str):
+    """Get dashboard data for senior customer"""
+    
+    # Simulate recent transactions
+    recent_activity = [
+        {
+            'id': '1',
+            'description': 'Pension Deposit',
+            'amount': 2850.00,
+            'date': datetime.now().isoformat(),
+            'status': 'completed',
+            'type': 'credit'
+        },
+        {
+            'id': '2',
+            'description': 'Electric Bill',
+            'amount': -145.23,
+            'date': (datetime.now() - timedelta(days=1)).isoformat(),
+            'status': 'completed',
+            'type': 'debit'
+        }
+    ]
+    
+    return {
+        'customer_id': customer_id,
+        'balance': 12450.67,
+        'recent_activity': recent_activity,
+        'next_pension': {
+            'date': '2025-12-01',
+            'amount': 2850.00,
+            'source': 'Social Security'
+        },
+        'alerts': [],
+        'csat_score': 95
+    }
+
+@router.get("/analytics")
+async def get_analytics():
+    """Get platform analytics"""
+    return {
+        'total_transactions': 21200,
+        'fraud_prevented': 127,
+        'fraud_prevention_rate': 99.4,
+        'cost_savings': 69400,
+        'stp_rate': 97.2,
+        'avg_processing_time': 0.8
+    }
+```
+
+### 2. FRONTEND IMPLEMENTATION
+
+#### A. Main App (frontend/src/App.tsx):
+```typescript
+import React from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { ThemeProvider, CssBaseline } from '@mui/material';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+import theme from './theme';
+import Layout from './components/Layout/Layout';
+import Home from './pages/Home';
+import Transform from './pages/Transform';
+import Dashboard from './pages/Dashboard';
+import Payments from './pages/Payments';
+
+const queryClient = new QueryClient();
+
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <BrowserRouter>
+          <Layout>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/transform" element={<Transform />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/payments" element={<Payments />} />
+            </Routes>
+          </Layout>
+        </BrowserRouter>
+      </ThemeProvider>
+    </QueryClientProvider>
+  );
+}
+
+export default App;
+```
+
+#### B. Senior Dashboard (frontend/src/components/Dashboard/SeniorDashboard.tsx):
+```typescript
+import React, { useState } from 'react';
+import {
+  Container,
+  Card,
+  CardHeader,
+  CardContent,
+  Typography,
+  Box,
+  Button,
+  Stack,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Chip,
+  Avatar
+} from '@mui/material';
+import {
+  CheckCircle as CheckCircleIcon,
+  Warning as WarningIcon,
+  TrendingUp as TrendingUpIcon,
+  Notifications as NotificationsIcon,
+  Phone as PhoneIcon
+} from '@mui/icons-material';
+import { useQuery } from '@tanstack/react-query';
+import axios from 'axios';
+
+const SeniorDashboard: React.FC = () => {
+  const { data: dashboardData, isLoading } = useQuery({
+    queryKey: ['senior-dashboard'],
+    queryFn: async () => {
+      const response = await axios.get('http://localhost:8000/api/dashboard/senior/CUST001');
+      return response.data;
+    }
+  });
+
+  if (isLoading) return <Typography>Loading...</Typography>;
+
+  return (
+    <Container maxWidth="md" sx={{ py: 4 }}>
+      <Card elevation={3}>
+        <CardHeader
+          title={
+            <Typography variant="h4" sx={{ fontSize: '2rem' }}>
+              Good Morning, Amitabh & Jaya! ☀️
+            </Typography>
+          }
+          avatar={
+            <Avatar sx={{ width: 60, height: 60, bgcolor: 'primary.main' }}>
+              AB
+            </Avatar>
+          }
+        />
+        
+        <CardContent>
+          {/* Balance Display */}
+          <Box sx={{ textAlign: 'center', py: 3, bgcolor: '#f5f5f5', borderRadius: 2, mb: 3 }}>
+            <Typography variant="body1" color="text.secondary" sx={{ fontSize: '1.2rem' }}>
+              Account Balance
+            </Typography>
+            <Typography variant="h3" color="primary" sx={{ my: 2 }}>
+              ${dashboardData?.balance.toLocaleString()}
+            </Typography>
+            <Chip
+              label="Pension deposited 2 hours ago"
+              color="success"
+              icon={<TrendingUpIcon />}
+              sx={{ fontSize: '1rem', py: 2 }}
+            />
+          </Box>
+
+          {/* Next Payment */}
+          <Card variant="outlined" sx={{ mb: 3, p: 2 }}>
+            <Typography variant="h6" gutterBottom sx={{ fontSize: '1.3rem' }}>
+              📅 Next Expected Payment
+            </Typography>
+            <Typography variant="body1" sx={{ fontSize: '1.1rem' }}>
+              {dashboardData?.next_pension.source} - {dashboardData?.next_pension.date}
+            </Typography>
+            <Typography variant="h6" color="primary">
+              Estimated: ${dashboardData?.next_pension.amount.toLocaleString()}
+            </Typography>
+          </Card>
+
+          {/* Quick Actions */}
+          <Stack direction="row" spacing={2} sx={{ mb: 3 }}>
+            <Button
+              variant="contained"
+              size="large"
+              fullWidth
+              startIcon={<NotificationsIcon />}
+              sx={{ py: 2, fontSize: '1.1rem' }}
+            >
+              View Alerts
+            </Button>
+            <Button
+              variant="outlined"
+              size="large"
+              fullWidth
+              startIcon={<PhoneIcon />}
+              sx={{ py: 2, fontSize: '1.1rem' }}
+            >
+              Call Bank
+            </Button>
+          </Stack>
+
+          {/* Recent Activity */}
+          <Typography variant="h6" gutterBottom sx={{ fontSize: '1.3rem', mt: 3 }}>
+            Recent Activity
+          </Typography>
+          <List>
+            {dashboardData?.recent_activity.map((tx: any) => (
+              <ListItem
+                key={tx.id}
+                sx={{
+                  border: '1px solid #e0e0e0',
+                  borderRadius: 2,
+                  mb: 1,
+                  bgcolor: 'white'
+                }}
+              >
+                <ListItemIcon>
+                  {tx.status === 'completed' ? (
+                    <CheckCircleIcon color="success" sx={{ fontSize: 40 }} />
+                  ) : (
+                    <WarningIcon color="warning" sx={{ fontSize: 40 }} />
+                  )}
+                </ListItemIcon>
+                <ListItemText
+                  primary={
+                    <Typography variant="h6" sx={{ fontSize: '1.2rem' }}>
+                      {tx.description}
+                    </Typography>
+                  }
+                  secondary={
+                    <Typography variant="body1" sx={{ fontSize: '1rem' }}>
+                      {tx.amount > 0 ? '+' : ''}${Math.abs(tx.amount).toFixed(2)}
+                      {' • '}
+                      {new Date(tx.date).toLocaleString()}
+                    </Typography>
+                  }
+                />
+              </ListItem>
+            ))}
+          </List>
+        </CardContent>
+      </Card>
+    </Container>
+  );
+};
+
+export default SeniorDashboard;
+```
+
+#### C. Transform Page (frontend/src/pages/Transform.tsx):
+```typescript
+import React, { useState } from 'react';
+import {
+  Container,
+  Card,
+  CardContent,
+  TextField,
+  Button,
+  Typography,
+  Box,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Alert
+} from '@mui/material';
+import { Upload as UploadIcon } from '@mui/icons-material';
+import axios from 'axios';
+import Editor from '@monaco-editor/react';
+
+const Transform: React.FC = () => {
+  const [messageText, setMessageText] = useState('');
+  const [formatType, setFormatType] = useState('MT103');
+  const [result, setResult] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleTransform = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.post('http://localhost:8000/api/transform/', {
+        message_text: messageText,
+        format_type: formatType
+      });
+      setResult(response.data);
+    } catch (error) {
+      console.error('Transform error:', error);
+      setResult({ success: false, errors: ['Transformation failed'] });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Typography variant="h4" gutterBottom>
+        Legacy Message Transformation
+      </Typography>
+      
+      <Card sx={{ mb: 3 }}>
+        <CardContent>
+          <FormControl fullWidth sx={{ mb: 2 }}>
+            <InputLabel>Format Type</InputLabel>
+            <Select
+              value={formatType}
+              onChange={(e) => setFormatType(e.target.value)}
+              label="Format Type"
+            >
+              <MenuItem value="MT103">SWIFT MT103</MenuItem>
+              <MenuItem value="NACHA">NACHA CCD</MenuItem>
+            </Select>
+          </FormControl>
+
+          <TextField
+            fullWidth
+            multiline
+            rows={12}
+            value={messageText}
+            onChange={(e) => setMessageText(e.target.value)}
+            placeholder="Paste your legacy message here..."
+            sx={{ mb: 2 }}
+          />
+
+          <Button
+            variant="contained"
+            size="large"
+            onClick={handleTransform}
+            disabled={loading || !messageText}
+            startIcon={<UploadIcon />}
+          >
+            Transform to ISO 20022
+          </Button>
+        </CardContent>
+      </Card>
+
+      {result && (
+        <Card>
+          <CardContent>
+            {result.success ? (
+              <>
+                <Alert severity="success" sx={{ mb: 2 }}>
+                  Transformation successful! ✓ XML validated
+                </Alert>
+                <Typography variant="h6" gutterBottom>
+                  ISO 20022 XML Output:
+                </Typography>
+                <Box sx={{ border: '1px solid #ddd', borderRadius: 1 }}>
+                  <Editor
+                    height="400px"
+                    language="xml"
+                    value={result.iso20022_xml}
+                    options={{
+                      readOnly: true,
+                      minimap: { enabled: false }
+                    }}
+                  />
+                </Box>
+              </>
+            ) : (
+              <Alert severity="error">
+                Transformation failed: {result.errors.join(', ')}
+              </Alert>
+            )}
+          </CardContent>
+        </Card>
+      )}
+    </Container>
+  );
+};
+
+export default Transform;
+```
+
+#### D. Fraud Alert Component (frontend/src/components/Fraud/FraudAlert.tsx):
+```typescript
+import React from 'react';
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  Typography,
+  Box,
+  Button,
+  Stack,
+  Card,
+  List,
+  ListItem,
+  ListItemText,
+  Alert,
+  AlertTitle,
+  Paper
+} from '@mui/material';
+import {
+  Warning as WarningIcon,
+  CheckCircle as CheckCircleIcon,
+  Block as BlockIcon,
+  Phone as PhoneIcon
+} from '@mui/icons-material';
+
+interface FraudAlertProps {
+  open: boolean;
+  transaction: any;
+  fraudAnalysis: any;
+  onConfirm: () => void;
+  onBlock: () => void;
+  onCallMe: () => void;
+}
+
+const FraudAlert: React.FC<FraudAlertProps> = ({
+  open,
+  transaction,
+  fraudAnalysis,
+  onConfirm,
+  onBlock,
+  onCallMe
+}) => {
+  return (
+    <Dialog open={open} maxWidth="md" fullWidth>
+      <DialogTitle>
+        <Box display="flex" alignItems="center">
+          <WarningIcon color="warning" sx={{ fontSize: 50, mr: 2 }} />
+          <Typography variant="h4">
+            Unusual Transaction Detected
+          </Typography>
+        </Box>
+      </DialogTitle>
+      
+      <DialogContent>
+        <Alert severity="warning" sx={{ mb: 3, fontSize: '1.2rem' }}>
+          We noticed a transaction that doesn't match your typical pattern
+        </Alert>
+
+        {/* Transaction Details */}
+        <Card sx={{ mb: 3, p: 3, bgcolor: '#fff3e0' }}>
+          <Typography variant="h5" gutterBottom fontWeight="bold">
+            Transaction Details:
+          </Typography>
+          <List>
+            <ListItem>
+              <ListItemText
+                primary={<Typography variant="h6">Amount</Typography>}
+                secondary={
+                  <Typography variant="h4" color="error">
+                    ${transaction?.amount.toFixed(2)}
+                  </Typography>
+                }
+              />
+            </ListItem>
+            <ListItem>
+              <ListItemText
+                primary={<Typography variant="h6">To</Typography>}
+                secondary={
+                  <Typography variant="h5">
+                    {transaction?.recipient_name}
+                  </Typography>
+                }
+              />
+            </ListItem>
+            <ListItem>
+              <ListItemText
+                primary={<Typography variant="h6">Purpose</Typography>}
+                secondary={
+                  <Typography variant="h5">
+                    {transaction?.remittance_info}
+                  </Typography>
+                }
+              />
+            </ListItem>
+          </List>
+        </Card>
+
+        {/* Scam Warning */}
+        {fraudAnalysis?.matched_scam && (
+          <Paper elevation={3} sx={{ p: 3, mb: 3, bgcolor: '#ffebee' }}>
+            <Typography variant="h5" gutterBottom fontWeight="bold" color="error">
+              ⚠️ THIS LOOKS LIKE A SCAM
+            </Typography>
+            <Typography variant="body1" sx={{ fontSize: '1.2rem', mb: 2 }}>
+              {fraudAnalysis.matched_scam.description}
+            </Typography>
+            <Typography variant="h6" gutterBottom>
+              How to Protect Yourself:
+            </Typography>
+            <List>
+              {fraudAnalysis.matched_scam.prevention_tips.map((tip: string, idx: number) => (
+                <ListItem key={idx}>
+                  <Typography variant="body1" sx={{ fontSize: '1.1rem' }}>
+                    • {tip}
+                  </Typography>
+                </ListItem>
+              ))}
+            </List>
+          </Paper>
+        )}
+
+        {/* Question */}
+        <Paper elevation={3} sx={{ p: 3, mb: 3, bgcolor: '#e3f2fd' }}>
+          <Typography variant="h5" gutterBottom fontWeight="bold">
+            Did you intend to make this payment?
+          </Typography>
+          <Typography variant="body1" sx={{ fontSize: '1.2rem' }}>
+            If you recognize this transaction, click "Yes, I Made This" below.
+            If you don't recognize it, click "No, This Is Fraud" and we'll block it immediately.
+          </Typography>
+        </Paper>
+
+        {/* Action Buttons */}
+        <Stack direction="column" spacing={2}>
+          <Button
+            variant="contained"
+            color="success"
+            size="large"
+            fullWidth
+            sx={{ py: 2.5, fontSize: '1.3rem' }}
+            startIcon={<CheckCircleIcon />}
+            onClick={onConfirm}
+          >
+            ✅ Yes, I Made This Payment
+          </Button>
+          
+          <Button
+            variant="contained"
+            color="error"
+            size="large"
+            fullWidth
+            sx={{ py: 2.5, fontSize: '1.3rem' }}
+            startIcon={<BlockIcon />}
+            onClick={onBlock}
+          >
+            🚫 No, This Is Fraud - Block It
+          </Button>
+          
+          <Button
+            variant="outlined"
+            size="large"
+            fullWidth
+            sx={{ py: 2.5, fontSize: '1.3rem' }}
+            startIcon={<PhoneIcon />}
+            onClick={onCallMe}
+          >
+            📞 Call Me - I Need Help
+          </Button>
+        </Stack>
+
+        {/* Reassurance */}
+        <Alert severity="info" sx={{ mt: 3, fontSize: '1.1rem' }}>
+          <strong>You're protected:</strong> If this is fraud, you won't be charged.
+          We'll issue a new card and reverse any unauthorized charges.
+        </Alert>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+export default FraudAlert;
+```
+
+### 3. CONFIGURATION FILES
+
+#### A. Backend Requirements (backend/requirements.txt):
+```
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+sqlalchemy==2.0.23
+pydantic==2.5.0
+python-multipart==0.0.6
+lxml==4.9.3
+xmlschema==2.5.0
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-dateutil==2.8.2
+```
+
+#### B. Frontend Package.json (frontend/package.json):
+```json
+{
+  "name": "safepay-guardian-frontend",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.20.0",
+    "@mui/material": "^5.14.20",
+    "@mui/icons-material": "^5.14.19",
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
+    "@tanstack/react-query": "^5.12.2",
+    "axios": "^1.6.2",
+    "@monaco-editor/react": "^4.6.0",
+    "recharts": "^2.10.3"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.43",
+    "@types/react-dom": "^18.2.17",
+    "@vitejs/plugin-react": "^4.2.1",
+    "typescript": "^5.3.3",
+    "vite": "^5.0.8"
+  }
+}
+```
+
+#### C. Replit Configuration (.replit):
+```toml
+run = "bash run.sh"
+modules = ["python-3.11", "nodejs-20"]
+
+[nix]
+channel = "stable-23_11"
+
+[deployment]
+run = ["bash", "run.sh"]
+deploymentTarget = "cloudrun"
+```
+
+#### D. Run Script (run.sh):
+```bash
+#!/bin/bash
+
+# Install Python dependencies
+cd backend
+pip install -r requirements.txt
+
+# Install Node dependencies
+cd ../frontend
+npm install
+
+# Start backend in background
+cd ../backend
+python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 &
+
+# Start frontend
+cd ../frontend
+npm run dev -- --host 0.0.0.0 --port 5173
+```
+
+### 4. SAMPLE DATA
+
+#### Create sample data file (backend/app/data/sample_data.json):
+```json
+{
+  "sample_mt103": ":20:TRX123456789\n:23B:CRED\n:32A:231006USD12500,00\n:50K:John Doe\n123 Main Street\nWhite Plains NY 10601\n:59:Jane Smith\n456 Elm Street\nYonkers NY 10701\n:70:Invoice 2023-09-001\n:71A:SHA",
+  
+  "sample_nacha": "101 123456789 987654321230906A094101BankName                         \n5225CompanyName            987654321PPDPayroll         230906  1123456789      \n62298765432100012500000000000000000000000000000000000000000000000123456789Doe, John                      \n822000000100098765432100001250000000000000000000987654321                       \n9000001000001000000001250000000000000000000",
+  
+  "customers": [
+    {
+      "customer_id": "CUST001",
+      "name": "Amitabh Bachchan",
+      "age": 68,
+      "persona_type": "retiree",
+      "email": "amitabh@example.com",
+      "phone": "(845) 555-0123"
+    }
+  ],
+  
+  "scam_examples": [
+    {
+      "amount": 5000,
+      "remittance_info": "IRS TAX PAYMENT URGENT ARREST WARRANT",
+      "expected_fraud_score": 95
+    },
+    {
+      "amount": 2500,
+      "remittance_info": "Emergency bail grandson accident",
+      "expected_fraud_score": 88
+    }
+  ]
+}
+```
+
+### 5. DEPLOYMENT INSTRUCTIONS
+
+1. **Create new Replit project**
+2. **Copy all files into appropriate directories**
+3. **Run the application** - Replit will automatically detect and run via .replit config
+4. **Access the application**:
+   - Frontend: https://[your-repl].repl.co (port 5173)
+   - Backend API: https://[your-repl].repl.co:8000
+   - API Docs: https://[your-repl].repl.co:8000/docs
+
+### 6. DEMO FLOW
+
+1. Start on Home page with overview
+2. Navigate to Transform page
+3. Paste sample MT103 message
+4. Show transformation to ISO 20022 XML
+5. Navigate to Dashboard (Senior view)
+6. Show balance, recent activity, pension tracking
+7. Simulate a fraudulent transaction
+8. Show fraud alert modal with scam detection
+9. Show analytics dashboard with metrics
+
+### 7. KEY FEATURES TO HIGHLIGHT IN DEMO
+
+✅ Real-time transformation (MT103/NACHA → ISO 20022)
+✅ Senior-friendly large text interface
+✅ AI-powered fraud detection
+✅ Scam pattern matching with educational content
+✅ Multi-channel intervention (app + phone + SMS simulation)
+✅ Pension payment tracking with timeline
+✅ Cost comparison analytics
+✅ Accessibility features
+
+IMPORTANT: Make sure all text is large (18-20px minimum), high contrast, and buttons are at least 44px height for senior accessibility.
+
+Please build this complete application with all the components, API endpoints, and features described above. Focus on making the senior dashboard and fraud detection features work perfectly, as these are the key differentiators for the case competition.
+```
+
+---
+
+## Additional Notes to Include in Chat
+
+After pasting the main prompt, also include:
+
+"Please also:
+1. Add error handling throughout
+2. Include loading states for all API calls
+3. Make the fraud alert modal trigger automatically when fraud is detected
+4. Add sample demo buttons to simulate fraud scenarios
+5. Create a landing page explaining the project
+6. Add comments to all code for clarity
+7. Ensure mobile responsiveness (especially for senior users on tablets)
+8. Add a 'Demo Mode' toggle that shows pre-populated data
+9. Include the existing mt103_transformer.py and nacha_transformer.py files I'll provide
+10. Make sure CORS is properly configured between frontend and backend"
+
+This prompt is extremely detailed and should give Replit Agent everything it needs to build a working demo!

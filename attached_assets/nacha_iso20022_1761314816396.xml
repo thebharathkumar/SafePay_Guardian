@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pain.001.001.09" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <CstmrCdtTrfInitn>
+        <GrpHdr>
+            <MsgId>987654321230906</MsgId>
+            <CreDtTm>2023-09-06T00:00:00Z</CreDtTm>
+            <NbOfTxs>1</NbOfTxs>
+            <CtrlSum>0.00</CtrlSum>
+            <InitgPty>
+                <Nm>CompanyName</Nm>
+                <Id>
+                    <OrgId>
+                        <Othr>
+                            <Id>123456789</Id>
+                        </Othr>
+                    </OrgId>
+                </Id>
+            </InitgPty>
+        </GrpHdr>
+        <PmtInf>
+            <PmtInfId>987654321</PmtInfId>
+            <PmtMtd>TRF</PmtMtd>
+            <BtchBookg>true</BtchBookg>
+            <ReqdExctnDt>
+                <Dt>2023-09-06</Dt>
+            </ReqdExctnDt>
+            <Dbtr>
+                <Nm>CompanyName</Nm>
+            </Dbtr>
+            <DbtrAcct>
+                <Id>
+                    <Othr>
+                        <Id>987654321</Id>
+                    </Othr>
+                </Id>
+            </DbtrAcct>
+            <DbtrAgt>
+                <FinInstnId>
+                    <ClrSysMmbId>
+                        <MmbId>987654321</MmbId>
+                    </ClrSysMmbId>
+                </FinInstnId>
+            </DbtrAgt>
+            <CdtTrfTxInf>
+                <PmtId>
+                    <EndToEndId>230906</EndToEndId>
+                </PmtId>
+                <Amt>
+                    <InstdAmt Ccy="USD">0.00</InstdAmt>
+                </Amt>
+                <CdtrAgt>
+                    <FinInstnId>
+                        <ClrSysMmbId>
+                            <MmbId>RECEIVING_BANK</MmbId>
+                        </ClrSysMmbId>
+                    </FinInstnId>
+                </CdtrAgt>
+                <Cdtr>
+                    <Nm>Doe, John</Nm>
+                </Cdtr>
+                <CdtrAcct>
+                    <Id>
+                        <Othr>
+                            <Id>BENEFICIARY_ACCOUNT</Id>
+                        </Othr>
+                    </Id>
+                </CdtrAcct>
+                <RmtInf>
+                    <Ustrd>Payroll Deposit</Ustrd>
+                </RmtInf>
+            </CdtTrfTxInf>
+        </PmtInf>
+    </CstmrCdtTrfInitn>
+</Document>

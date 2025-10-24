@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <FIToFICstmrCdtTrf>
+        <GrpHdr>
+            <MsgId>TRX123456789</MsgId>
+            <CreDtTm>2023-09-01T00:00:00Z</CreDtTm>
+            <NbOfTxs>1</NbOfTxs>
+            <CtrlSum>12500.00</CtrlSum>
+            <TtlIntrBkSttlmAmt Ccy="USD">12500.00</TtlIntrBkSttlmAmt>
+            <IntrBkSttlmDt>2023-09-01</IntrBkSttlmDt>
+            <SttlmInf>
+                <SttlmMtd>CLRG</SttlmMtd>
+            </SttlmInf>
+        </GrpHdr>
+        <CdtTrfTxInf>
+            <PmtId>
+                <InstrId>TRX123456789</InstrId>
+                <EndToEndId>TRX123456789</EndToEndId>
+                <TxId>TRX123456789</TxId>
+            </PmtId>
+            <IntrBkSttlmAmt Ccy="USD">12500.00</IntrBkSttlmAmt>
+            <IntrBkSttlmDt>2023-09-01</IntrBkSttlmDt>
+            <ChrgBr>SHA</ChrgBr>
+            <Dbtr>
+                <Nm>John Doe</Nm>
+                <PstlAdr>
+                    <StrtNm>123 Main Street</StrtNm>
+                    <TwnNm>White Plains</TwnNm>
+                    <CtrySubDvsn>NY</CtrySubDvsn>
+                    <Pst Cd>10601</PstCd>
+                    <Ctry>US</Ctry>
+                </PstlAdr>
+            </Dbtr>
+            <DbtrAcct>
+                <Id>
+                    <Othr>
+                        <Id>123456789</Id>
+                    </Othr>
+                </Id>
+            </DbtrAcct>
+            <DbtrAgt>
+                <FinInstnId>
+                    <ClrSysMmbId>
+                        <MmbId>987654321</MmbId>
+                    </ClrSysMmbId>
+                </FinInstnId>
+            </DbtrAgt>
+            <CdtrAgt>
+                <FinInstnId>
+                    <ClrSysMmbId>
+                        <MmbId>RECEIVINGBANK</MmbId>
+                    </ClrSysMmbId>
+                </FinInstnId>
+            </CdtrAgt>
+            <Cdtr>
+                <Nm>Jane Smith</Nm>
+                <PstlAdr>
+                    <StrtNm>456 Elm Street</StrtNm>
+                    <TwnNm>Yonkers</TwnNm>
+                    <CtrySubDvsn>NY</CtrySubDvsn>
+                    <PstCd>10701</PstCd>
+                    <Ctry>US</Ctry>
+                </PstlAdr>
+            </Cdtr>
+            <CdtrAcct>
+                <Id>
+                    <Othr>
+                        <Id>BENEFICIARYACCT</Id>
+                    </Othr>
+                </Id>
+            </CdtrAcct>
+            <RmtInf>
+                <Ustrd>Invoice 2023-09-001</Ustrd>
+            </RmtInf>
+        </CdtTrfTxInf>
+    </FIToFICstmrCdtTrf>
+</Document>
