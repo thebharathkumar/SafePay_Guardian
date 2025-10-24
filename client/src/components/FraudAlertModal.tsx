@@ -115,9 +115,9 @@ export default function FraudAlertModal({
             </div>
             <div className="flex-1">
               <DialogTitle className="text-3xl font-bold text-destructive mb-2" data-testid="text-fraud-alert-title">
-                ⚠️ Fraud Alert Detected
+                Fraud Alert Detected
               </DialogTitle>
-              <Badge variant="destructive" className="text-lg px-4 py-1.5 font-semibold">
+              <Badge variant="destructive" className="text-xl px-4 py-1.5 font-semibold">
                 {fraudScore}% Fraud Risk Score
               </Badge>
             </div>
@@ -142,7 +142,7 @@ export default function FraudAlertModal({
                   </p>
                   {primaryScam.matchedTriggers && primaryScam.matchedTriggers.length > 0 && (
                     <div className="mt-3">
-                      <p className="text-lg font-medium text-muted-foreground mb-2">
+                      <p className="text-xl font-medium text-muted-foreground mb-2">
                         Suspicious keywords detected:
                       </p>
                       <div className="flex flex-wrap gap-2">
@@ -150,7 +150,7 @@ export default function FraudAlertModal({
                           <Badge 
                             key={idx} 
                             variant="destructive" 
-                            className="text-base px-3 py-1"
+                            className="text-xl px-3 py-1"
                           >
                             {trigger}
                           </Badge>
@@ -169,7 +169,7 @@ export default function FraudAlertModal({
               <Info className="h-5 w-5" />
               Transaction Details
             </h4>
-            <div className="space-y-3 text-lg">
+            <div className="space-y-3 text-xl">
               <div className="flex justify-between py-2 border-b">
                 <span className="text-muted-foreground">Amount:</span>
                 <span className="font-bold text-xl">${transaction.amount?.toLocaleString()}</span>
@@ -188,14 +188,15 @@ export default function FraudAlertModal({
           {/* Prevention Tips */}
           {primaryScam?.preventionTips && primaryScam.preventionTips.length > 0 && (
             <Card className="border-2 border-primary/20 bg-primary/5 p-6">
-              <h4 className="text-2xl font-bold mb-4 text-foreground" data-testid="text-prevention-tips">
-                🛡️ How to Protect Yourself
+              <h4 className="text-2xl font-bold mb-4 text-foreground flex items-center gap-2" data-testid="text-prevention-tips">
+                <ShieldAlert className="h-7 w-7 text-primary" />
+                How to Protect Yourself
               </h4>
               <ul className="space-y-3">
                 {primaryScam.preventionTips.map((tip, idx) => (
                   <li 
                     key={idx} 
-                    className="flex items-start gap-3 text-lg leading-relaxed"
+                    className="flex items-start gap-3 text-xl leading-relaxed"
                   >
                     <CheckCircle2 className="h-6 w-6 text-primary flex-shrink-0 mt-0.5" />
                     <span>{tip}</span>
@@ -217,7 +218,7 @@ export default function FraudAlertModal({
               data-testid="button-approve-payment"
             >
               <CheckCircle2 className="h-6 w-6 mr-3" />
-              ✅ Yes, I Made This Payment
+              Yes, I Made This Payment
             </Button>
 
             {/* Block Button */}
@@ -229,7 +230,7 @@ export default function FraudAlertModal({
               data-testid="button-block-payment"
             >
               <ShieldAlert className="h-6 w-6 mr-3" />
-              🚫 No, This Is Fraud - Block It
+              No, This Is Fraud - Block It
             </Button>
 
             {/* Call Me Button */}
@@ -240,7 +241,7 @@ export default function FraudAlertModal({
               data-testid="button-request-call"
             >
               <Phone className="h-6 w-6 mr-3" />
-              📞 Call Me - I Need Help
+              Call Me - I Need Help
             </Button>
           </div>
         </div>

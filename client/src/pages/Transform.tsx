@@ -53,18 +53,30 @@ Springfield IL 62701
 
   // Auto-demo mode effect
   useEffect(() => {
-    if (isDemoMode && !content) {
+    if (isDemoMode && !content && !result) {
       // Pre-fill with suspicious transaction
       setContent(suspiciousMT103);
       setFormat("MT103");
       
       toast({
         title: "Demo Mode Activated",
-        description: "Sample fraud transaction loaded. Click 'Try Fraud Detection' to see it in action!",
+        description: "Auto-running fraud detection in 10 seconds...",
         duration: 5000,
       });
+
+      // Auto-submit after 10 seconds
+      const timer = setTimeout(() => {
+        toast({
+          title: "Running Fraud Detection Demo",
+          description: "Processing suspicious transaction...",
+          duration: 3000,
+        });
+        transformMutation.mutate({ format: "MT103", content: suspiciousMT103 });
+      }, 10000);
+
+      return () => clearTimeout(timer);
     }
-  }, [isDemoMode]);
+  }, [isDemoMode, content, result]);
 
   const transformMutation = useMutation({
     mutationFn: async (data: { format: string; content: string }) => {
@@ -170,7 +182,7 @@ Springfield IL 62701
                   >
                     {index + 1}
                   </div>
-                  <span className="mt-3 text-lg font-medium">{step}</span>
+                  <span className="mt-3 text-xl font-medium">{step}</span>
                 </div>
                 {index < 3 && (
                   <div
@@ -194,12 +206,12 @@ Springfield IL 62701
 
             {/* Format Selection */}
             <div className="mb-6">
-              <Label className="text-lg font-medium mb-4 block">Select Format</Label>
+              <Label className="text-xl font-medium mb-4 block">Select Format</Label>
               <div className="grid grid-cols-2 gap-4">
                 <Button
                   variant={format === "MT103" ? "default" : "outline"}
                   size="lg"
-                  className="text-lg h-16"
+                  className="text-xl h-16"
                   onClick={() => setFormat("MT103")}
                   data-testid="button-format-mt103"
                 >
@@ -209,7 +221,7 @@ Springfield IL 62701
                 <Button
                   variant={format === "NACHA" ? "default" : "outline"}
                   size="lg"
-                  className="text-lg h-16"
+                  className="text-xl h-16"
                   onClick={() => setFormat("NACHA")}
                   data-testid="button-format-nacha"
                 >
@@ -224,7 +236,7 @@ Springfield IL 62701
               <Button
                 variant="outline"
                 size="lg"
-                className="w-full text-lg h-14"
+                className="w-full text-xl h-14"
                 onClick={() => setContent(format === "MT103" ? sampleMT103 : sampleNACHA)}
                 data-testid="button-load-sample"
               >
@@ -234,7 +246,7 @@ Springfield IL 62701
 
             {/* Input Textarea */}
             <div className="mb-6">
-              <Label htmlFor="payment-content" className="text-lg font-medium mb-4 block">
+              <Label htmlFor="payment-content" className="text-xl font-medium mb-4 block">
                 Paste {format} Content
               </Label>
               <Textarea
@@ -242,7 +254,7 @@ Springfield IL 62701
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 placeholder={`Paste your ${format} payment message here...`}
-                className="min-h-[400px] text-lg font-mono resize-none"
+                className="min-h-[400px] text-xl font-mono resize-none"
                 data-testid="input-payment-content"
               />
             </div>
@@ -280,7 +292,7 @@ Springfield IL 62701
                   data-testid="button-demo-fraud-detection"
                 >
                   <Zap className="mr-3 h-6 w-6" />
-                  ⚡ Try Fraud Detection Demo
+                  Try Fraud Detection Demo
                 </Button>
               )}
             </div>

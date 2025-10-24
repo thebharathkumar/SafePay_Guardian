@@ -45,8 +45,9 @@ export default function SeniorDashboard() {
               <DollarSign className="h-10 w-10 text-primary" />
             </div>
           </div>
-          <Badge className="bg-green-600 text-white text-lg px-6 py-2" data-testid="badge-pension-status">
-            ✅ Pension deposited 2 hours ago
+          <Badge className="bg-green-600 text-white text-xl px-6 py-2" data-testid="badge-pension-status">
+            <CheckCircle2 className="h-5 w-5 mr-2" />
+            Pension deposited 2 hours ago
           </Badge>
         </Card>
 
@@ -106,18 +107,20 @@ export default function SeniorDashboard() {
                     <p className="text-xl text-muted-foreground">
                       {transaction.recipientName || transaction.remittanceInfo || 'Payment'}
                     </p>
-                    <p className="text-lg text-muted-foreground mt-1">
+                    <p className="text-xl text-muted-foreground mt-1">
                       {format(new Date(transaction.timestamp), 'MMM d, yyyy h:mm a')}
                     </p>
                   </div>
                   <div>
                     {transaction.fraudFlag ? (
-                      <Badge variant="destructive" className="text-lg px-4 py-2">
-                        ⚠️ Review Needed
+                      <Badge variant="destructive" className="text-xl px-4 py-2">
+                        <AlertTriangle className="h-5 w-5 mr-2" />
+                        Review Needed
                       </Badge>
                     ) : (
-                      <Badge variant="default" className="text-lg px-4 py-2 bg-green-600 text-white">
-                        ✅ Completed
+                      <Badge variant="default" className="text-xl px-4 py-2 bg-green-600 text-white">
+                        <CheckCircle2 className="h-5 w-5 mr-2" />
+                        Completed
                       </Badge>
                     )}
                   </div>
@@ -149,7 +152,7 @@ export default function SeniorDashboard() {
             data-testid="button-call-bank"
           >
             <Phone className="h-8 w-8 mr-4" />
-            📞 Call Bank Now
+            Call Bank Now
           </Button>
         </div>
 
