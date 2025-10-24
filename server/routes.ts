@@ -204,10 +204,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let transactionId: string = "";
 
       // Transform based on format
+      // Always generate unique transaction ID to avoid duplicates
+      transactionId = `TXN-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+      
       if (format === "MT103") {
         const result = transformMT103(content);
         xml = result.xml;
-        transactionId = result.data.transactionReference || `MT103-${Date.now()}`;
         amount = parseFloat(result.data.amount || "0");
         currency = result.data.currency || "USD";
         senderName = result.data.orderingCustomer?.split('\n')[0] || "";
@@ -216,7 +218,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else if (format === "NACHA") {
         const result = transformNACHA(content);
         xml = result.xml;
-        transactionId = result.data.entryDetail?.traceNumber || `NACHA-${Date.now()}`;
         const amountStr = result.data.entryDetail?.amount || "0";
         amount = parseInt(amountStr) / 100;
         senderName = result.data.batchHeader?.companyName || "";
